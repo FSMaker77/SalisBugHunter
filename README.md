@@ -1,4 +1,4 @@
-# 🕷️ Salis Bug HungerHunter - Bug Bounty Automation
+# 🕷️ Salis Bug Hunter - Bug Bounty Automation
 
 SalisBugHunter is a specialized Bash script designed to automate the initial phase of Bug Bounty Hunting. It leverages the "Unix Philosophy" by chaining powerful tools like **Subfinder**, **Httpx**, and **Nuclei** into a seamless pipeline.
 
@@ -20,3 +20,4 @@ cd SalisBugHunter
 chmod +x salisbughunter.sh
 
 ./salisbughunter.sh
+
