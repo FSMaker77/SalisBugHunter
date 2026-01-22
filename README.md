@@ -15,7 +15,8 @@ Designed for efficiency on VPS environments.
 ## 🛠️ Installation
 
 ```bash
-git clone [https://github.com/IL_TUO_USERNAME/salisbughunter.git](https://github.com/IL_TUO_USERNAME/salisbughunter.git)
+git clone [https://github.com/YOUR_USERNAME/salisbughunter.git](https://github.com/IL_TUO_USERNAME/salisbughunter.git)
 cd SalisBugHunter
 chmod +x salisbughunter.sh
+
 ./salisbughunter.sh
