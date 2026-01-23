@@ -12,12 +12,16 @@ fi
 # SALISBUGHUNTER v2.0 - AUTOMATION TOOL
 # ==========================================
 
-# Colori per il testo
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# ==========================================
+# SALISBUGHUNTER v2.1 - NEON EDITION
+# ==========================================
+
+# Colori NEON (High Visibility)
+RED='\033[1;31m'      # Rosso Acceso
+GREEN='\033[1;32m'    # Verde Lime
+BLUE='\033[1;36m'     # Ciano/Azzurro (Leggibile su sfondo nero)
+YELLOW='\033[1;33m'   # Giallo Vivo
+NC='\033[0m'          # Reset
 
 # Percorsi e Config
 GO_BIN="$HOME/go/bin"
@@ -219,3 +223,4 @@ while true; do
     esac
 
 done
+
