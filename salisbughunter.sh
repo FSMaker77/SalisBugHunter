@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# --- INIZIO PROTEZIONE AUTOMATICA ---
+if [ -z "$TMUX" ]; then                                   # <-- Se non sono in Tmux
+  echo "Attivazione scudo automatico (Tmux)..."           # <-- Avvisa l'utente
+  tmux attach -t SalisSession || tmux new -s SalisSession ./salisbughunter.sh  # <-- Crea o aggancia sessione
+  exit                                                    # <-- Chiudi la sessione non protetta
+fi
+# --- FINE PROTEZIONE AUTOMATICA ---
+
 # ==========================================
 # SALISBUGHUNTER v2.0 - AUTOMATION TOOL
 # ==========================================
@@ -209,4 +217,5 @@ while true; do
         9) exit 0 ;;
         *) echo -e "${RED}Opzione non valida${NC}"; sleep 1 ;;
     esac
+
 done
