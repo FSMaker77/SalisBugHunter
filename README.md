@@ -25,11 +25,15 @@ cd SalisBugHunter
 # Fix Windows/Linux formatting issues (Important if uploaded via FTP)
 dos2unix salisbughunter.sh
 
+# Install tmux
+sudo apt update && sudo apt install tmux -y
+
 # Make executable
 chmod +x salisbughunter.sh
 
 # Run
 ./salisbughunter.sh
+
 
 
 
