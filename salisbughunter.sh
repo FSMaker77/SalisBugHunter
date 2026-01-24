@@ -9,15 +9,15 @@ fi
 # --- FINE PROTEZIONE AUTOMATICA ---
 
 # ==========================================
-# SALISBUGHUNTER v2.2 - STEALTH & MODULAR
+# SALISBUGHUNTER v2.3 - HETZNER SAFE EDITION
 # ==========================================
 
-# Colori NEON (High Visibility per PowerShell)
-RED='\033[1;31m'      # Rosso Acceso
-GREEN='\033[1;32m'    # Verde Lime
-BLUE='\033[1;36m'     # Ciano/Azzurro (Molto leggibile)
-YELLOW='\033[1;33m'   # Giallo Vivo
-NC='\033[0m'          # Reset
+# Colori NEON
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;36m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
 # Percorsi e Config
 GO_BIN="$HOME/go/bin"
@@ -28,17 +28,15 @@ export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 show_header() {
     clear
     echo -e "${RED}======================================================${NC}"
-    echo -e "${RED}      SALISBUGHUNTER v2.2 - STEALTH EDITION          ${NC}"
+    echo -e "${RED}      SALISBUGHUNTER v2.3 - HETZNER SAFE             ${NC}"
     echo -e "${RED}======================================================${NC}"
     
-    # Check rapido credenziali
     if [ -f "$CONFIG_FILE" ]; then
         echo -e "${GREEN}[*] Credenziali HackerOne configurate.${NC}"
     else
         echo -e "${YELLOW}[!] Credenziali NON configurate.${NC}"
     fi
 
-    # Conteggi file
     echo -e "${BLUE}Target (Aziende):${NC}    $(wc -l < targets.txt 2>/dev/null || echo 0)"
     echo -e "${BLUE}Domini Totali (Raw):${NC} $(wc -l < subs_all.txt 2>/dev/null || echo 0)"
     echo -e "${BLUE}Siti Vivi (Live):${NC}    $(wc -l < subs_live.txt 2>/dev/null || echo 0)"
@@ -92,7 +90,7 @@ install_tools() {
     read -p "Premi Invio..."
 }
 
-# 2. Scarica Scope HackerOne (RAW)
+# 2. Scarica Scope
 get_scope_raw() {
     check_creds 
     echo -e "${BLUE}[*] Download Scope da HackerOne in corso...${NC}"
@@ -116,7 +114,7 @@ filter_wildcards() {
     read -p "Premi Invio..."
 }
 
-# 4. Solo Subfinder (Crea la lista grezza)
+# 4. Solo Subfinder
 run_subfinder() {
     if [ ! -f targets.txt ]; then
         echo -e "${RED}[!] Errore: Manca targets.txt.${NC}"
@@ -124,12 +122,10 @@ run_subfinder() {
         return
     fi
 
-    # Controllo se il file esiste già per risparmiare tempo
     if [ -f subs_all.txt ]; then
-        echo -e "${YELLOW}[!] ATTENZIONE: Il file 'subs_all.txt' esiste già (magari è enorme).${NC}"
-        read -p "Vuoi sovrascriverlo e cercare tutto da capo? (s/N): " resp
+        echo -e "${YELLOW}[!] ATTENZIONE: 'subs_all.txt' esiste già.${NC}"
+        read -p "Vuoi sovrascriverlo? (s/N): " resp
         if [[ "$resp" != "s" && "$resp" != "S" ]]; then
-            echo -e "${GREEN}Ok, saltiamo Subfinder e usiamo il file esistente.${NC}"
             return
         fi
     fi
@@ -138,50 +134,56 @@ run_subfinder() {
     $GO_BIN/subfinder -dL targets.txt -silent -o subs_all.txt
     
     count=$(wc -l < subs_all.txt)
-    echo -e "${GREEN}[V] Finito! Trovati $count sottodomini in subs_all.txt${NC}"
+    echo -e "${GREEN}[V] Finito! Trovati $count sottodomini.${NC}"
     read -p "Premi Invio..."
 }
 
-# 5. Solo Httpx (Filtra i vivi dal file grosso)
+# 5. Solo Httpx (Con protezione IP Privati)
 run_httpx() {
     if [ ! -f subs_all.txt ]; then
-        echo -e "${RED}[!] Errore: Manca subs_all.txt. Esegui prima il punto 4.${NC}"
+        echo -e "${RED}[!] Errore: Manca subs_all.txt.${NC}"
         read -p "Premi Invio..."
         return
     fi
 
-    echo -e "${BLUE}[*] Avvio Httpx (Filtra siti vivi - STEALTH MODE)...${NC}"
+    echo -e "${BLUE}[*] Avvio Httpx (Filtra vivi + Protezione IP Privati)...${NC}"
     
-    # MODIFICA SICUREZZA HETZNER: threads 10, rate-limit 5
-    $GO_BIN/httpx -l subs_all.txt -silent -threads 10 -rate-limit 5 -title -tech-detect -status-code -o subs_live.txt
+    # MODIFICA IMPORTANTE: -exclude-private-ips
+    # Questo impedisce di scansionare reti locali/interne che fanno arrabbiare Hetzner
+    $GO_BIN/httpx -l subs_all.txt -silent \
+    -threads 10 -rate-limit 5 \
+    -exclude-private-ips \
+    -title -tech-detect -status-code -o subs_live.txt
     
     live_count=$(wc -l < subs_live.txt)
-    echo -e "${GREEN}[V] Httpx finito! $live_count siti vivi salvati in subs_live.txt${NC}"
+    echo -e "${GREEN}[V] Httpx finito! $live_count siti vivi (e pubblici) salvati.${NC}"
     read -p "Premi Invio..."
 }
 
-# 6. Scansione Vulnerabilità (Nuclei)
+# 6. Scansione Nuclei
 run_scan() {
     if [ ! -f subs_live.txt ]; then
-        echo -e "${RED}[!] Errore: Manca subs_live.txt. Esegui il punto 5.${NC}"
+        echo -e "${RED}[!] Errore: Manca subs_live.txt.${NC}"
         read -p "Premi Invio..."
         return
     fi
 
-    echo -e "${RED}[!!!] AVVIO NUCLEI (CRITICAL & HIGH - STEALTH MODE) [!!!]${NC}"
+    echo -e "${RED}[!!!] AVVIO NUCLEI (CRITICAL & HIGH - STEALTH) [!!!]${NC}"
     
-    # MODIFICA SICUREZZA HETZNER: rate-limit 5, bulk-size 2
-    $GO_BIN/nuclei -l subs_live.txt -s critical,high -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_SALIS.txt
+    # Nuclei lavora sui risultati puliti di Httpx, quindi è sicuro
+    $GO_BIN/nuclei -l subs_live.txt -s critical,high \
+    -rate-limit 5 -bulk-size 2 -concurrency 10 \
+    -o BUGS_SALIS.txt
     
     echo -e "${GREEN}[V] Scansione terminata. Controlla BUGS_SALIS.txt${NC}"
     read -p "Premi Invio..."
 }
 
-# 7. Pipeline Automatica (Tutto insieme)
+# 7. Auto-Pilota
 run_full() {
     check_creds
-    echo -e "${YELLOW}Questa opzione esegue TUTTO in sequenza (STEALTH MODE).${NC}"
-    read -p "Premi Invio per partire (o CTRL+C per annullare)..."
+    echo -e "${YELLOW}AUTO-PILOTA: Download -> Scrematura -> Recon -> Scan (SAFE MODE)${NC}"
+    read -p "Premi Invio per partire..."
     
     echo -e "${BLUE}[1/5] Download Scope...${NC}"
     $GO_BIN/bbscope h1 -u "$H1_USER" -t "$H1_KEY" > scope_raw.txt
@@ -189,33 +191,35 @@ run_full() {
     echo -e "${BLUE}[2/5] Scrematura...${NC}"
     grep -o '\*\.[a-zA-Z0-9._-]*' scope_raw.txt | sed 's/^\*\.//' | sort -u > targets.txt
     
-    echo -e "${BLUE}[3/5] Subfinder (Ricerca Domini)...${NC}"
+    echo -e "${BLUE}[3/5] Subfinder...${NC}"
     $GO_BIN/subfinder -dL targets.txt -silent -o subs_all.txt
 
-    echo -e "${BLUE}[4/5] Httpx (Verifica Vivi - STEALTH)...${NC}"
-    $GO_BIN/httpx -l subs_all.txt -silent -threads 10 -rate-limit 5 -title -tech-detect -status-code -o subs_live.txt
+    echo -e "${BLUE}[4/5] Httpx (SAFE MODE)...${NC}"
+    # Aggiunto -exclude-private-ips anche qui
+    $GO_BIN/httpx -l subs_all.txt -silent -threads 10 -rate-limit 5 -exclude-private-ips \
+    -title -tech-detect -status-code -o subs_live.txt
     
-    echo -e "${RED}[5/5] Scan Nuclei (Bug Hunt - STEALTH)...${NC}"
+    echo -e "${RED}[5/5] Scan Nuclei...${NC}"
     $GO_BIN/nuclei -l subs_live.txt -s critical,high -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_SALIS.txt
     
-    echo -e "${GREEN}[V] TUTTO FINITO! Controlla BUGS_SALIS.txt${NC}"
+    echo -e "${GREEN}[V] TUTTO FINITO!${NC}"
     read -p "Premi Invio..."
 }
 
 # Loop del Menù
 while true; do
     show_header
-    echo "1. Installazione Completa (Go + Tools)"
-    echo "2. Scarica Scope Grezzo (Bbscope)"
-    echo "3. Scrematura Wildcards (Crea targets.txt)"
+    echo "1. Installazione Completa"
+    echo "2. Scarica Scope (Bbscope)"
+    echo "3. Scrematura Wildcards"
     echo "------------------------------------"
-    echo "4. Subfinder (Crea lista enorme domini)"
-    echo "5. Httpx (Cerca siti vivi dalla lista enorme)"
+    echo "4. Subfinder (Crea lista enorme)"
+    echo "5. Httpx (Filtra vivi + NO IP PRIVATI)"
     echo "------------------------------------"
     echo "6. Vulnerability Scanning (Nuclei)"
-    echo "7. AUTO-PILOTA (Tutto insieme)"
+    echo "7. AUTO-PILOTA (Safe Mode)"
     echo "------------------------------------"
-    echo "8. Configura/Resetta Credenziali H1"
+    echo "8. Reset Credenziali"
     echo "9. Esci"
     echo ""
     read -p "SalisBugHunter > Scegli: " choice
@@ -224,10 +228,10 @@ while true; do
         1) install_tools ;;
         2) get_scope_raw ;;
         3) filter_wildcards ;;
-        4) run_subfinder ;;     # Modificato
-        5) run_httpx ;;         # Modificato
-        6) run_scan ;;          # Nuclei ora è il 6
-        7) run_full ;;          # Auto ora è il 7
+        4) run_subfinder ;;
+        5) run_httpx ;;
+        6) run_scan ;;
+        7) run_full ;;
         8) reset_creds ;;
         9) exit 0 ;;
         *) echo -e "${RED}Opzione non valida${NC}"; sleep 1 ;;
