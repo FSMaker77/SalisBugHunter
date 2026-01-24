@@ -17,7 +17,7 @@
 
 ```bash
 # Clone the repository
-git clone [https://github.com/FSMaker77/SalisBugHunter.git](https://github.com/FSMaker77/SalisBugHunter.git)
+git clone https://github.com/FSMaker77/SalisBugHunter.git
 
 # Enter the directory
 cd SalisBugHunter
@@ -30,5 +30,6 @@ chmod +x salisbughunter.sh
 
 # Run
 ./salisbughunter.sh
+
 
 
