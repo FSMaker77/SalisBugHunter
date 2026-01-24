@@ -1,4 +1,4 @@
-# 🕷️ Salis Bug Hunter v2.2 - Stealth & Modular Edition
+# 🕷️ Salis Bug Hunter v2.3 - Stealth & Modular Edition
 
 **SalisBugHunter** is an advanced Bash automation script designed for Bug Bounty Hunters. It streamlines the reconnaissance pipeline by chaining industry-standard tools (**Subfinder**, **Httpx**, **Nuclei**) into a seamless workflow.
 
@@ -33,6 +33,7 @@ chmod +x salisbughunter.sh
 
 # Run
 ./salisbughunter.sh
+
 
 
 
