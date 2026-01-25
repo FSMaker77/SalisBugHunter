@@ -25,12 +25,12 @@ Unlike other tools that focus solely on speed, SalisBugHunter is optimized for *
 ## 🚀 Usage
 The tool offers an interactive menu with 12 options:
 
-#1. Setup & Config
+1. Setup & Config
 Full Installation: Installs all necessary dependencies.
 
 Reset Credentials: Configures your HackerOne API Keys.
 
-#2. Reconnaissance (Step-by-Step)
+2. Reconnaissance (Step-by-Step)
 Download Scope: Fetches targets from your H1 programs.
 
 Wildcard Filtering: Extracts wildcards and prepares targets.txt.
@@ -39,7 +39,7 @@ Subfinder: Enumerates subdomains.
 
 Httpx (Clean): Verifies live domains, filters private IPs, and cleans the output to remove unnecessary "noise" for the scanner.
 
-#3. Vulnerability Scanning (Segmented)
+3. Vulnerability Scanning (Segmented)
 Run targeted scans based on your available time:
 
 🔴 Scan CRITICAL: Looks for critical vulnerabilities only (Fast).
@@ -50,7 +50,7 @@ Run targeted scans based on your available time:
 
 🔵 Scan LOW/INFO: Information gathering and minor bugs.
 
-#4. ✈️ Auto-Pilot
+4. ✈️ Auto-Pilot
 Launch option 10 to execute the entire workflow (from scope download to full scanning) sequentially, without interruptions. Perfect for overnight scans.
 
 📂 Output Structure
@@ -68,7 +68,7 @@ BUGS_HIGH.txt: High vulnerability report.
 
 (etc...)
 
-## ⚠️ Disclaimer
+# ⚠️ Disclaimer
 This tool is created for educational purposes and for authorized Bug Bounty activities. The author assumes no responsibility for the misuse of this software. Ensure you have explicit permission before scanning any target.
 
 Happy Hunting! 🕵️‍♂️
@@ -141,6 +141,7 @@ BUGS_HIGH.txt: High vulnerability report.
 This tool is created for educational purposes and for authorized Bug Bounty activities. The author assumes no responsibility for the misuse of this software. Ensure you have explicit permission before scanning any target.
 
 Happy Hunting! 🕵️‍♂️
+
 
 
 
