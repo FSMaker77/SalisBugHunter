@@ -68,7 +68,7 @@ BUGS_HIGH.txt: High vulnerability report.
 
 (etc...)
 
-# ⚠️ Disclaimer
+## ⚠️ Disclaimer
 This tool is created for educational purposes and for authorized Bug Bounty activities. The author assumes no responsibility for the misuse of this software. Ensure you have explicit permission before scanning any target.
 
 Happy Hunting! 🕵️‍♂️
