@@ -21,6 +21,9 @@ Unlike other tools that focus solely on speed, SalisBugHunter is optimized for *
 * **🎯 Segmented Scanning:** Scans divided by severity (Critical, High, Medium, Low) to allow for immediate triage.
 * **🔑 HackerOne Integration:** Native integration with `bbscope` to automatically download targets from your private programs.
 
+
+
+
 🚀 Usage
 The tool offers an interactive menu with 12 options:
 
@@ -140,6 +143,7 @@ BUGS_HIGH.txt: High vulnerability report.
 This tool is created for educational purposes and for authorized Bug Bounty activities. The author assumes no responsibility for the misuse of this software. Ensure you have explicit permission before scanning any target.
 
 Happy Hunting! 🕵️‍♂️
+
 
 
 
