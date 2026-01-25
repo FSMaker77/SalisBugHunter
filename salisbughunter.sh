@@ -9,7 +9,7 @@ fi
 # --- FINE PROTEZIONE AUTOMATICA ---
 
 # ==========================================
-# SALISBUGHUNTER v2.3 - HETZNER SAFE EDITION
+# SALISBUGHUNTER v2.5 - MODULAR EDITION
 # ==========================================
 
 # Colori NEON
@@ -28,7 +28,7 @@ export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 show_header() {
     clear
     echo -e "${RED}======================================================${NC}"
-    echo -e "${RED}      SALISBUGHUNTER v2.3 - HETZNER SAFE             ${NC}"
+    echo -e "${RED}   SALISBUGHUNTER v2.5 - MODULAR & SAFE              ${NC}"
     echo -e "${RED}======================================================${NC}"
     
     if [ -f "$CONFIG_FILE" ]; then
@@ -38,8 +38,16 @@ show_header() {
     fi
 
     echo -e "${BLUE}Target (Aziende):${NC}    $(wc -l < targets.txt 2>/dev/null || echo 0)"
-    echo -e "${BLUE}Domini Totali (Raw):${NC} $(wc -l < subs_all.txt 2>/dev/null || echo 0)"
-    echo -e "${BLUE}Siti Vivi (Live):${NC}    $(wc -l < subs_live.txt 2>/dev/null || echo 0)"
+    echo -e "${BLUE}Siti Vivi (Clean):${NC}   $(wc -l < subs_live_cleaned.txt 2>/dev/null || echo 0)"
+    
+    # Contatori Bug Trovati
+    crit=$(wc -l < BUGS_CRITICAL.txt 2>/dev/null || echo 0)
+    high=$(wc -l < BUGS_HIGH.txt 2>/dev/null || echo 0)
+    med=$(wc -l < BUGS_MEDIUM.txt 2>/dev/null || echo 0)
+    
+    echo -e "${RED}CRITICAL Found:${NC}      $crit"
+    echo -e "${RED}HIGH Found:${NC}          $high"
+    echo -e "${YELLOW}MEDIUM Found:${NC}        $med"
     echo ""
 }
 
@@ -130,7 +138,7 @@ run_subfinder() {
         fi
     fi
 
-    echo -e "${BLUE}[*] Avvio Subfinder (Solo ricerca domini)...${NC}"
+    echo -e "${BLUE}[*] Avvio Subfinder...${NC}"
     $GO_BIN/subfinder -dL targets.txt -silent -o subs_all.txt
     
     count=$(wc -l < subs_all.txt)
@@ -138,7 +146,7 @@ run_subfinder() {
     read -p "Premi Invio..."
 }
 
-# 5. Solo Httpx (Con protezione IP Privati)
+# 5. Httpx (Safe + Cleaning)
 run_httpx() {
     if [ ! -f subs_all.txt ]; then
         echo -e "${RED}[!] Errore: Manca subs_all.txt.${NC}"
@@ -146,61 +154,106 @@ run_httpx() {
         return
     fi
 
-    echo -e "${BLUE}[*] Avvio Httpx (Filtra vivi + Protezione IP Privati)...${NC}"
+    echo -e "${BLUE}[*] Avvio Httpx (Hetzner Safe Mode)...${NC}"
     
-    # MODIFICA IMPORTANTE: -exclude-private-ips
-    # Questo impedisce di scansionare reti locali/interne che fanno arrabbiare Hetzner
+    # 1. Scansione Verbose
     $GO_BIN/httpx -l subs_all.txt -silent \
     -threads 10 -rate-limit 5 \
     -exclude-private-ips \
     -title -tech-detect -status-code -o subs_live.txt
     
-    live_count=$(wc -l < subs_live.txt)
-    echo -e "${GREEN}[V] Httpx finito! $live_count siti vivi (e pubblici) salvati.${NC}"
-    read -p "Premi Invio..."
-}
-
-# 6. Scansione Nuclei
-run_scan() {
-    if [ ! -f subs_live.txt ]; then
-        echo -e "${RED}[!] Errore: Manca subs_live.txt.${NC}"
-        read -p "Premi Invio..."
-        return
+    # 2. Pulizia
+    echo -e "${BLUE}[*] Pulizia output per Nuclei...${NC}"
+    if [ -f subs_live.txt ]; then
+        awk '{print $1}' subs_live.txt > subs_live_cleaned.txt
+        live_count=$(wc -l < subs_live.txt)
+        echo -e "${GREEN}[V] Httpx finito! $live_count siti vivi.${NC}"
+        echo -e "${GREEN}[V] File pulito creato: subs_live_cleaned.txt${NC}"
+    else
+        echo -e "${RED}[!] Nessun risultato vivo trovato.${NC}"
     fi
-
-    echo -e "${RED}[!!!] AVVIO NUCLEI (CRITICAL & HIGH - STEALTH) [!!!]${NC}"
-    
-    # Nuclei lavora sui risultati puliti di Httpx, quindi è sicuro
-    $GO_BIN/nuclei -l subs_live.txt -s critical,high \
-    -rate-limit 5 -bulk-size 2 -concurrency 10 \
-    -o BUGS_SALIS.txt
-    
-    echo -e "${GREEN}[V] Scansione terminata. Controlla BUGS_SALIS.txt${NC}"
     read -p "Premi Invio..."
 }
 
-# 7. Auto-Pilota
+# --- FUNZIONI NUCLEI SEPARATE ---
+
+check_list() {
+    if [ ! -f subs_live_cleaned.txt ]; then
+        echo -e "${RED}[!] Errore: Manca subs_live_cleaned.txt (Esegui step 5).${NC}"
+        read -p "Premi Invio..."
+        return 1
+    fi
+    return 0
+}
+
+run_critical() {
+    check_list || return
+    echo -e "${RED}[!!!] AVVIO NUCLEI - CRITICAL ONLY [!!!]${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s critical \
+    -rate-limit 5 -bulk-size 2 -concurrency 10 \
+    -o BUGS_CRITICAL.txt
+    echo -e "${GREEN}[V] Scan Critical terminato.${NC}"
+    read -p "Premi Invio..."
+}
+
+run_high() {
+    check_list || return
+    echo -e "${RED}[!!!] AVVIO NUCLEI - HIGH ONLY [!!!]${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s high \
+    -rate-limit 5 -bulk-size 2 -concurrency 10 \
+    -o BUGS_HIGH.txt
+    echo -e "${GREEN}[V] Scan High terminato.${NC}"
+    read -p "Premi Invio..."
+}
+
+run_medium() {
+    check_list || return
+    echo -e "${YELLOW}[!!!] AVVIO NUCLEI - MEDIUM ONLY [!!!]${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s medium \
+    -rate-limit 5 -bulk-size 2 -concurrency 10 \
+    -o BUGS_MEDIUM.txt
+    echo -e "${GREEN}[V] Scan Medium terminato.${NC}"
+    read -p "Premi Invio..."
+}
+
+run_low() {
+    check_list || return
+    echo -e "${BLUE}[!!!] AVVIO NUCLEI - LOW & INFO ONLY [!!!]${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s low,info \
+    -rate-limit 5 -bulk-size 2 -concurrency 10 \
+    -o BUGS_LOW_INFO.txt
+    echo -e "${GREEN}[V] Scan Low/Info terminato.${NC}"
+    read -p "Premi Invio..."
+}
+
+# 10. Auto-Pilota (Sequenziale)
 run_full() {
     check_creds
-    echo -e "${YELLOW}AUTO-PILOTA: Download -> Scrematura -> Recon -> Scan (SAFE MODE)${NC}"
+    echo -e "${YELLOW}AUTO-PILOTA: Esegue TUTTO in sequenza (Safe Mode)${NC}"
     read -p "Premi Invio per partire..."
     
-    echo -e "${BLUE}[1/5] Download Scope...${NC}"
+    # Download & Recon
     $GO_BIN/bbscope h1 -u "$H1_USER" -t "$H1_KEY" > scope_raw.txt
-    
-    echo -e "${BLUE}[2/5] Scrematura...${NC}"
     grep -o '\*\.[a-zA-Z0-9._-]*' scope_raw.txt | sed 's/^\*\.//' | sort -u > targets.txt
-    
-    echo -e "${BLUE}[3/5] Subfinder...${NC}"
     $GO_BIN/subfinder -dL targets.txt -silent -o subs_all.txt
-
-    echo -e "${BLUE}[4/5] Httpx (SAFE MODE)...${NC}"
-    # Aggiunto -exclude-private-ips anche qui
+    
+    # Httpx Clean
     $GO_BIN/httpx -l subs_all.txt -silent -threads 10 -rate-limit 5 -exclude-private-ips \
     -title -tech-detect -status-code -o subs_live.txt
+    awk '{print $1}' subs_live.txt > subs_live_cleaned.txt
     
-    echo -e "${RED}[5/5] Scan Nuclei...${NC}"
-    $GO_BIN/nuclei -l subs_live.txt -s critical,high -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_SALIS.txt
+    # Nuclei Sequenziale (Senza pause)
+    echo -e "${RED}[+] Scan Critical...${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s critical -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_CRITICAL.txt
+    
+    echo -e "${RED}[+] Scan High...${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s high -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_HIGH.txt
+    
+    echo -e "${YELLOW}[+] Scan Medium...${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s medium -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_MEDIUM.txt
+    
+    echo -e "${BLUE}[+] Scan Low/Info...${NC}"
+    $GO_BIN/nuclei -l subs_live_cleaned.txt -s low,info -rate-limit 5 -bulk-size 2 -concurrency 10 -o BUGS_LOW_INFO.txt
     
     echo -e "${GREEN}[V] TUTTO FINITO!${NC}"
     read -p "Premi Invio..."
@@ -213,14 +266,17 @@ while true; do
     echo "2. Scarica Scope (Bbscope)"
     echo "3. Scrematura Wildcards"
     echo "------------------------------------"
-    echo "4. Subfinder (Crea lista enorme)"
-    echo "5. Httpx (Filtra vivi + NO IP PRIVATI)"
+    echo "4. Subfinder (Crea lista domini)"
+    echo "5. Httpx (Crea file PULITO per scan)"
     echo "------------------------------------"
-    echo "6. Vulnerability Scanning (Nuclei)"
-    echo "7. AUTO-PILOTA (Safe Mode)"
+    echo -e "6. Scan ${RED}CRITICAL${NC}"
+    echo -e "7. Scan ${RED}HIGH${NC}"
+    echo -e "8. Scan ${YELLOW}MEDIUM${NC}"
+    echo -e "9. Scan ${BLUE}LOW & INFO${NC}"
     echo "------------------------------------"
-    echo "8. Reset Credenziali"
-    echo "9. Esci"
+    echo "10. AUTO-PILOTA (Tutto insieme)"
+    echo "11. Reset Credenziali"
+    echo "12. Esci"
     echo ""
     read -p "SalisBugHunter > Scegli: " choice
 
@@ -230,10 +286,13 @@ while true; do
         3) filter_wildcards ;;
         4) run_subfinder ;;
         5) run_httpx ;;
-        6) run_scan ;;
-        7) run_full ;;
-        8) reset_creds ;;
-        9) exit 0 ;;
+        6) run_critical ;;
+        7) run_high ;;
+        8) run_medium ;;
+        9) run_low ;;
+        10) run_full ;;
+        11) reset_creds ;;
+        12) exit 0 ;;
         *) echo -e "${RED}Opzione non valida${NC}"; sleep 1 ;;
     esac
 done
