@@ -21,7 +21,7 @@ NC='\033[0m'
 
 # Percorsi e Config
 GO_BIN="$HOME/go/bin"
-CONFIG_FILE="$HOME/.salis_config"
+CONFIG_FILE="$HOME/.settings"
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 # Funzione Header
@@ -296,3 +296,4 @@ while true; do
         *) echo -e "${RED}Opzione non valida${NC}"; sleep 1 ;;
     esac
 done
+
