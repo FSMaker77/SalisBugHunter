@@ -22,9 +22,7 @@ Unlike other tools that focus solely on speed, SalisBugHunter is optimized for *
 * **🔑 HackerOne Integration:** Native integration with `bbscope` to automatically download targets from your private programs.
 
 
-
-
-🚀 Usage
+## 🚀 Usage
 The tool offers an interactive menu with 12 options:
 
 1. Setup & Config
@@ -70,7 +68,7 @@ BUGS_HIGH.txt: High vulnerability report.
 
 (etc...)
 
-⚠️ Disclaimer
+##⚠️ Disclaimer
 This tool is created for educational purposes and for authorized Bug Bounty activities. The author assumes no responsibility for the misuse of this software. Ensure you have explicit permission before scanning any target.
 
 Happy Hunting! 🕵️‍♂️
@@ -143,6 +141,7 @@ BUGS_HIGH.txt: High vulnerability report.
 This tool is created for educational purposes and for authorized Bug Bounty activities. The author assumes no responsibility for the misuse of this software. Ensure you have explicit permission before scanning any target.
 
 Happy Hunting! 🕵️‍♂️
+
 
 
 
