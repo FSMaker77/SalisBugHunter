@@ -1,38 +1,41 @@
-# 🕷️ Salis Bug Hunter v2.3 - Stealth & Modular Edition
+# 🕷️ SalisBugHunter v2.5 - Modular & Safe Recon Framework
 
-**SalisBugHunter** is an advanced Bash automation script designed for Bug Bounty Hunters. It streamlines the reconnaissance pipeline by chaining industry-standard tools (**Subfinder**, **Httpx**, **Nuclei**) into a seamless workflow.
+> **Automated, modular, and stealthy reconnaissance framework designed for Bug Bounty Hunters running on VPS providers with strict abuse policies (e.g., Hetzner).**
 
-> **v2.2 Update:** Now features "Stealth Mode" (Rate-Limiting) to prevent VPS Abuse bans (Hetzner Safe) and a Modular Architecture for handling large datasets.
+![Bash](https://img.shields.io/badge/Language-Bash-green)
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Focus](https://img.shields.io/badge/Focus-Recon%20%26%20Vulnerability%20Scanning-red)
 
-## 🚀 Key Features
+## 📖 Overview
 
-- **🛡️ Stealth Mode:** Pre-configured low rate-limits (`5 req/s`) to stay under the radar of VPS firewalls (tested on Hetzner).
-- **👻 Auto-Shield (Tmux):** Automatically detects if the script is running in a naked session and launches/attaches a `tmux` session to prevent data loss on disconnect.
-- **🧩 Modular Recon:** Separated Subdomain Enumeration (Step 4) from Live Probing (Step 5) to handle massive files (60MB+) without restarting the whole process.
-- **🎨 Neon UI:** High-visibility color scheme optimized for PowerShell and dark terminals.
-- **⚡ HackerOne Integration:** Automates scope downloading via `bbscope`.
-- **🎯 Smart Filtering:** Extracts wildcards and sanitizes target lists automatically.
+**SalisBugHunter** is an all-in-one Bash script designed to automate the reconnaissance (Recon) and vulnerability scanning workflow.
+
+Unlike other tools that focus solely on speed, SalisBugHunter is optimized for **stability** and **operational security (OPSEC)**. It utilizes "Safe" modes (controlled rate-limits) to prevent IP bans from sensitive VPS providers (like Hetzner) and includes a smart output cleaning system to optimize Nuclei results.
+
+## ✨ Features
+
+* **🛡️ Auto-Protection (Tmux):** Automatically detects if you are not in a Tmux session and starts one to ensure scans continue even if you disconnect.
+* **🧩 Modular Workflow:** Execute each step individually (Subdomains, Httpx, Nuclei Critical/High/Medium) or use the Auto-Pilot.
+* **☁️ Cloud Safe Mode:** Pre-configured with `rate-limit: 5` and `concurrency: 10` to avoid abuse flags from cloud providers.
+* **🧹 Smart Output Cleaning:** Automatically generates clean files (`subs_live_cleaned.txt`) by removing status codes and titles to maximize Nuclei efficiency.
+* **🎯 Segmented Scanning:** Scans divided by severity (Critical, High, Medium, Low) to allow for immediate triage.
+* **🔑 HackerOne Integration:** Native integration with `bbscope` to automatically download targets from your private programs.
 
 ## 🛠️ Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/FSMaker77/SalisBugHunter.git
+# 1. Clone the repository
+git clone [https://github.com/FSMaker77/SalisBugHunter.git](https://github.com/FSMaker77/SalisBugHunter.git)
 
-# Enter the directory
+# 2. Enter the folder
 cd SalisBugHunter
 
-# Fix Windows/Linux formatting issues (Important if uploaded via FTP)
-dos2unix salisbughunter.sh
-
-# Install tmux
-sudo apt update && sudo apt install tmux -y
-
-# Make executable
+# 3. Make the script executable
 chmod +x salisbughunter.sh
 
-# Run
+# 4. Run
 ./salisbughunter.sh
+
 
 
 
